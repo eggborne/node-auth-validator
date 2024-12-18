@@ -1,5 +1,5 @@
 {
-  "name": "node-auth-validator",
+  "name": "visionary-tools-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,14 +7,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eggborne/node-auth-validator.git"
+    "url": "git+https://github.com/eggborne/visionary-tools-backend.git"
   },
   "author": "mike@mikedonovan.dev",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/eggborne/node-auth-validator/issues"
-  },
-  "homepage": "https://github.com/eggborne/node-auth-validator#readme",
+  "homepage": "https://github.com/eggborne/visionary-tools-backend#readme",
   "description": "",
   "dependencies": {
     "body-parser": "^1.20.3",
