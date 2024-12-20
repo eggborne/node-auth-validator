@@ -67,9 +67,6 @@ app.post('/api/users/validate', validateFirebaseToken, async (req, res) => {
       INSERT INTO users (uid, displayName, email, photoURL, accessToken)
       VALUES (:uid, :displayName, :email, :photoURL, :accessToken)
       ON DUPLICATE KEY UPDATE 
-        displayName = VALUES(displayName),
-        email = VALUES(email),
-        photoURL = VALUES(photoURL),
         accessToken = VALUES(accessToken),
         updated_at = CURRENT_TIMESTAMP;
     `;
@@ -121,7 +118,7 @@ app.post('/api/users/get', validateFirebaseToken, async (req, res) => {
     });
 
     const query = `
-      SELECT uid, displayName, email, photoURL, authorizations 
+      SELECT uid, displayName, email, photoURL, authorizations, preferences 
       FROM users 
       WHERE uid = :uid
     `;
@@ -142,8 +139,46 @@ app.post('/api/users/get', validateFirebaseToken, async (req, res) => {
         console.warn('Failed to parse authorizations JSON:', err);
       }
     }
+    if (user.preferences) {
+      try {
+        user.preferences = JSON.parse(user.preferences);
+      } catch (err) {
+        console.warn('Failed to parse preferences JSON:', err);
+      }
+    }
 
     return res.status(200).json(user);
+
+  } catch (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ error: 'Database operation failed' });
+  }
+});
+
+app.post('/api/users/update', validateFirebaseToken, async (req, res) => {
+  const { uid, accessToken, prop, newValue } = req.body;
+  if (!uid || !accessToken || !prop || !newValue) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const connection = await mysql.createConnection({
+      ...dbConfig,
+    });
+
+    const query = `
+      UPDATE users 
+      SET ${mysql.escapeId(prop)} = ? 
+      WHERE uid = ?
+    `;
+
+    const parsedValue = typeof newValue === 'object' ? JSON.stringify(newValue) : newValue;
+
+    await connection.execute(query, [parsedValue, uid]);
+
+    await connection.end();
+
+    return res.status(200).json({ message: 'User updated successfully' });
 
   } catch (error) {
     console.error('Database error:', error);
