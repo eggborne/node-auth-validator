@@ -211,6 +211,32 @@ app.post('/api/inventory/get', validateFirebaseToken, async (req, res) => {
   }
 });
 
+app.post('/api/inventory/create', validateFirebaseToken, async (req, res) => {
+  const { inventoryName, uid, accessToken, item } = req.body;
+
+  if (!inventoryName || !uid || !accessToken || !item) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const connection = await mysql.createConnection({
+      ...dbConfig,
+      namedPlaceholders: true,
+    });
+
+    const query = `INSERT INTO ${inventoryName} SET ?`;
+
+    await connection.execute(query, item);
+    await connection.end();
+
+    return res.status(200).json({ message: 'Item added successfully' });
+
+  } catch (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ error: 'Database operation failed' });
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
