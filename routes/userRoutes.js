@@ -1,9 +1,10 @@
 const express = require('express');
 const { defineDynamicModel } = require('../models/dynamicModel');
+const { tokenValidationMiddleware } = require('../middleware/tokenValidation');
 const router = express.Router();
 
 // Validate user
-router.post('/validate', async (req, res) => {
+router.post('/validate', tokenValidationMiddleware, async (req, res) => {
   const { uid, displayName, email, photoURL, accessToken } = req.body;
 
   if (!uid || !accessToken) {

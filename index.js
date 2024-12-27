@@ -1,13 +1,19 @@
 require('dotenv').config();
 const express = require('express');
-const { sequelize } = require('./models'); // Sequelize instance
-const schemaRoutes = require('./routes/schemaRoutes'); // Schema-related routes
-const inventoryRoutes = require('./routes/inventoryRoutes'); // Inventory-related routes
-const userRoutes = require('./routes/userRoutes'); // User-related routes
+const cors = require('cors');
+const { sequelize } = require('./models');
+const schemaRoutes = require('./routes/schemaRoutes');
+const inventoryRoutes = require('./routes/InventoryRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
 // Middleware
+app.use(cors({
+  origin: '*', // Replace with your frontend URL
+  methods: ['GET', 'POST', 'OPTIONS'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+}));
 app.use(express.json()); // Parse JSON bodies
 
 // Test database connection
@@ -16,18 +22,13 @@ sequelize
   .then(() => console.log('Database connected successfully.'))
   .catch((err) => {
     console.error('Database connection failed:', err);
-    process.exit(1); // Exit if the database connection fails
+    process.exit(1);
   });
 
 // Routes
-app.use('/api/schema', schemaRoutes); // Schema routes
-app.use('/api/inventory', inventoryRoutes); // Inventory routes
-app.use('/api/users', userRoutes); // User routes
-
-// Default route
-app.get('/', (req, res) => {
-  res.send('Welcome to the API!');
-});
+app.use('/api/schema', schemaRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -35,7 +36,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'An unexpected error occurred.' });
 });
 
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

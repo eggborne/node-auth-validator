@@ -1,24 +1,38 @@
-const { sequelize } = require('./index');
-const { mapToSequelizeType } = require('../utils/typeMapper');
+const { mapToSequelizeType } = require('../utils/typeMapper'); // Type mapper utility
+const db = require('./index');
+const sequelize = db.sequelize;
 
 async function getTableSchema(tableName) {
-  const [results] = await sequelize.query(`DESCRIBE ${tableName}`);
-  return results;
+  try {
+    const [results] = await sequelize.query(`DESCRIBE ${tableName}`);
+    return results;
+  } catch (error) {
+    console.error(`Error fetching schema for table "${tableName}":`, error);
+    throw error;
+  }
 }
 
 async function defineDynamicModel(tableName) {
-  const schema = await getTableSchema(tableName);
-  const attributes = {};
-  schema.forEach((column) => {
-    attributes[column.Field] = {
-      type: mapToSequelizeType(column.Type),
-      allowNull: column.Null === 'YES',
-      primaryKey: column.Key === 'PRI',
-      defaultValue: column.Default,
-    };
-  });
+  try {
+    const schema = await getTableSchema(tableName); // Get the schema of the table
+    const attributes = {};
 
-  return sequelize.define(tableName, attributes, { tableName, timestamps: false });
+    // Convert each column definition into Sequelize model attributes
+    schema.forEach((column) => {
+      attributes[column.Field] = {
+        type: mapToSequelizeType(column.Type),
+        allowNull: column.Null === 'YES',
+        primaryKey: column.Key === 'PRI',
+        defaultValue: column.Default,
+      };
+    });
+
+    // Dynamically define and return the model
+    return sequelize.define(tableName, attributes, { tableName, timestamps: false });
+  } catch (error) {
+    console.error(`Error defining model for table "${tableName}":`, error);
+    throw error;
+  }
 }
 
 module.exports = { defineDynamicModel, getTableSchema };

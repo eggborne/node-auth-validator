@@ -1,9 +1,10 @@
 const express = require('express');
 const { defineDynamicModel } = require('../models/dynamicModel');
+const { tokenValidationMiddleware } = require('../middleware/tokenValidation');
 const router = express.Router();
 
 // Fetch inventory
-router.post('/get', async (req, res) => {
+router.post('/get', tokenValidationMiddleware, async (req, res) => {
   const { databaseName, uid, accessToken } = req.body;
 
   if (!databaseName || !uid || !accessToken) {
@@ -22,7 +23,7 @@ router.post('/get', async (req, res) => {
 });
 
 // Add inventory
-router.post('/create', async (req, res) => {
+router.post('/create', tokenValidationMiddleware, async (req, res) => {
   const { databaseName, uid, accessToken, item } = req.body;
 
   if (!databaseName || !uid || !accessToken || !item) {
