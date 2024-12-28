@@ -1,3 +1,4 @@
 node_modules
 visionary-tools-firebase-adminsdk*
 .env
+.env.local

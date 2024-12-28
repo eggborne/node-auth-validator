@@ -1,7 +1,30 @@
-require('dotenv').config();
+
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
+const dotenv = require('dotenv');
+
+console.log('Raw NODE_ENV:', JSON.stringify(process.env.NODE_ENV));
+
+const env = (process.env.NODE_ENV || 'development').trim();
+console.log(`Environment detected: ${env}`);
+
+if (env === 'development') {
+  console.log('Loading .env.local');
+  dotenv.config({ path: '.env.local', override: true });
+} else {
+  console.log('Loading .env');
+  dotenv.config({ path: '.env', override: true });
+}
+
+console.log('Environment Variables:', {
+  NODE_ENV: process.env.NODE_ENV,
+  MYSQL_DATABASE: process.env.MYSQL_DATABASE,
+  MYSQL_USER: process.env.MYSQL_USER,
+  MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
+  MYSQL_HOST: process.env.MYSQL_HOST,
+});
+
 
 const sequelize = new Sequelize(
   process.env.MYSQL_DATABASE,
